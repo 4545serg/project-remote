@@ -1,20 +1,25 @@
-# PROJECT REMOTE
+# PROJECT REMOTE — Nintendo 3DS
 
-A standalone Nintendo 3DS built-in IR feasibility test. No Wi-Fi, internet, external transmitter, adapter, or accessory.
+A small Nintendo 3DS built-in IR feasibility test. It does not use Wi-Fi or external hardware.
 
-## Important compatibility finding
+## Build locally
 
-The documented 3DS IRU service is an IrDA-SIR data-transfer interface. The public libctru API exposes data transfers and bitrate selection, but does not document a raw consumer-remote carrier-frequency or arbitrary mark/space waveform generator. Standard Samsung TV and Roku IR compatibility is therefore **not established**. This project intentionally does not send fake TV commands or claim universal-remote functionality.
+Install devkitPro with the Nintendo 3DS development tools, then from this folder run:
 
-An archived 3DS IR proof-of-concept exists at https://github.com/RedTopper/3DS-Remote. Its limitations must be reviewed rather than assuming it controls TVs.
+```sh
+make
+```
 
-## Build
+The build produces `project_remote.3dsx` in the project root.
 
-Install devkitPro with the 3DS development tools, then run `make`. GitHub Actions builds a `.3dsx` artifact. This starter has not been compiled or tested on physical hardware in this environment. A successful build would not prove consumer IR compatibility.
+## Build with GitHub Actions
 
-## References
+The workflow is `.github/workflows/c-cpp.yml`. It uses the official `devkitpro/devkitarm` container, checks that the repository has the expected root-level `Makefile` and `source/main.c`, runs `make clean` and `make`, verifies the `.3dsx`, then uploads it as the `project-remote-3dsx` artifact.
 
-- https://www.3dbrew.org/wiki/IR_Services
-- https://github.com/devkitPro/libctru/blob/master/libctru/include/3ds/services/ir.h
-- https://github.com/RedTopper/3DS-Remote
-- https://github.com/devkitPro/3ds-examples
+**Important:** extract this ZIP and upload the *contents* of the extracted folder to the top level of your GitHub repository. Do not upload the enclosing folder `PROJECT_REMOTE_GITHUB_READY` as a nested folder. The repository root must directly contain `Makefile`, `source/`, and `.github/`.
+
+Replace the existing `.github/workflows/c-cpp.yml` with the one in this archive. If the repository has any other workflow that runs `./configure`, delete that obsolete workflow; otherwise GitHub may continue running it independently.
+
+## IR compatibility limitation
+
+The documented libctru IRU API exposes IrDA-style data transfers and bitrate control. It does not document a raw consumer-remote carrier-frequency or arbitrary mark/space waveform generator. This test initializes IRU and reads its bitrate; it does not claim to control Samsung TVs, Roku devices, or other consumer remotes.
